@@ -1,6 +1,6 @@
 ---
 title: BEACON FORECAST
-emoji: ◆
+emoji: 📈
 colorFrom: yellow
 colorTo: gray
 sdk: streamlit
