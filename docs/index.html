@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beacon Forecast</title>
+<style>
+  :root {
+    --accent: #F5A524;
+    --accent-dim: rgba(245,165,36,0.26);
+    --bg: #0E1420;
+    --panel: #171F30;
+    --border: #2A3448;
+    --text: #F2F3F5;
+    --muted: #97A0AE;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 28px; }
+
+  nav {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(10,10,12,0.75); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: 0.01em; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+  .navlinks { display: flex; gap: 28px; font-size: 0.92rem; color: var(--muted); }
+  .navlinks a:hover { color: var(--text); }
+
+  .hero {
+    position: relative; padding: 110px 0 80px; text-align: center; overflow: hidden;
+  }
+  .hero::before {
+    content: ""; position: absolute; top: -220px; left: 50%; transform: translateX(-50%);
+    width: 900px; height: 500px; background: radial-gradient(ellipse at center, var(--accent-dim) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .badge {
+    display: inline-block; padding: 6px 16px; border-radius: 999px; border: 1px solid var(--accent);
+    color: var(--accent); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; margin-bottom: 28px;
+    position: relative;
+  }
+  .hero h1 {
+    font-size: 4.2rem; line-height: 1.02; font-weight: 800; letter-spacing: -0.03em; margin: 0 0 24px;
+    background: linear-gradient(180deg, #fff 0%, #d7dbe2 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+    position: relative;
+  }
+  .hero p.sub {
+    max-width: 640px; margin: 0 auto 40px; color: var(--muted); font-size: 1.15rem; line-height: 1.6;
+    position: relative;
+  }
+  .cta-row { display: flex; gap: 14px; justify-content: center; position: relative; flex-wrap: wrap; }
+  .btn {
+    padding: 15px 28px; border-radius: 12px; font-weight: 700; font-size: 0.98rem; display: inline-block;
+    transition: transform 0.15s ease;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-primary { background: var(--accent); color: #0A0A0C; box-shadow: 0 8px 30px var(--accent-dim); }
+  .btn-secondary { background: var(--panel); color: var(--text); border: 1px solid var(--border); }
+
+  section { padding: 60px 0; border-top: 1px solid var(--border); }
+  .eyebrow { color: var(--accent); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 14px; }
+
+  .headline-card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 18px; padding: 36px 40px;
+    font-size: 1.55rem; font-weight: 600; line-height: 1.45;
+  }
+  .headline-card b { color: var(--accent); }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 20px; }
+  .metric-card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 22px 20px;
+  }
+  .metric-value { font-size: 2.1rem; font-weight: 800; color: var(--accent); margin-bottom: 6px; }
+  .metric-label { color: var(--muted); font-size: 0.88rem; line-height: 1.4; }
+
+  .steps { counter-reset: step; margin-top: 24px; }
+  .step { display: flex; gap: 18px; padding: 18px 0; border-bottom: 1px solid var(--border); }
+  .step:last-child { border-bottom: none; }
+  .step-num {
+    counter-increment: step; flex-shrink: 0; width: 34px; height: 34px; border-radius: 10px;
+    background: var(--panel); border: 1px solid var(--accent); color: var(--accent);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem;
+  }
+  .step-num::before { content: counter(step); }
+  .step-title { font-weight: 700; margin-bottom: 4px; }
+  .step-desc { color: var(--muted); font-size: 0.95rem; line-height: 1.55; }
+
+  .findings { display: grid; gap: 14px; margin-top: 20px; }
+  .finding {
+    background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--accent);
+    border-radius: 10px; padding: 18px 20px; font-size: 0.98rem; line-height: 1.6; color: #DCE1E8;
+  }
+
+  footer { padding: 50px 0 70px; text-align: center; color: var(--muted); font-size: 0.88rem; }
+  footer a { color: var(--accent); font-weight: 600; }
+  .footer-links { margin-top: 14px; display: flex; gap: 24px; justify-content: center; }
+
+  code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+  @media (max-width: 640px) {
+    .hero h1 { font-size: 2.6rem; }
+    .navlinks { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="brand"><span class="dot"></span> BCF &middot; Beacon Forecast Lab</div>
+    <div class="navlinks">
+      <a href="#results">Results</a>
+      <a href="#method">Method</a>
+      <a href="#findings">Findings</a>
+      <a href="https://github.com/data-geek-astronomy/BEACON_FORECAST">GitHub</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="wrap">
+    <span class="badge">RESEARCH PREVIEW &middot; BCF</span>
+    <h1>Beacon Forecast</h1>
+    <p class="sub">A demand forecaster that watches its own forecast errors day by day, and automatically retrains itself the moment a supply shock or other disruption breaks its assumptions &mdash; without waiting for a human to notice.</p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="https://huggingface.co/spaces/Darkweb007/BEACON_FORECAST">Launch live demo</a>
+      <a class="btn btn-secondary" href="https://github.com/data-geek-astronomy/BEACON_FORECAST">Read the code</a>
+    </div>
+  </div>
+</section>
+
+<section id="results">
+  <div class="wrap">
+    <div class="eyebrow">HEADLINE RESULT</div>
+    <div class="headline-card">A synthetic supply-shock event triggered an <b>automatic retrain within 4 days</b>, with the largest drift z-score (&minus;6.55) of any retrain event across a 2-year, 4-SKU walk-forward simulation.</div>
+    <div class="grid">
+      <div class="metric-card"><div class="metric-value">4 days</div><div class="metric-label">from injected shock to automated retrain trigger</div></div>
+      <div class="metric-card"><div class="metric-value">&minus;6.55</div><div class="metric-label">z-score at the shock-triggered retrain, the largest of any event</div></div>
+      <div class="metric-card"><div class="metric-value">4 SKUs &times; 2yr</div><div class="metric-label">walked forward day by day in the simulation</div></div>
+      <div class="metric-card"><div class="metric-value">~20</div><div class="metric-label">forecast MAE (units/day) after tuning, down from 117+ before a real bug fix</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="method">
+  <div class="wrap">
+    <div class="eyebrow">METHOD</div>
+    <h2 style="margin:0 0 6px; font-size:1.6rem;">Forecast, monitor, retrain &mdash; automatically</h2>
+    <p style="color:var(--muted); max-width:640px; margin:0 0 10px;">The drift monitor doesn't wait for a scheduled retrain: it watches forecast error day by day and reacts as soon as the error pattern stops looking normal.</p>
+    <div class="steps">
+      <div class="step"><div class="step-num"></div><div><div class="step-title">Forecast</div><div class="step-desc">A trend + weekly + yearly-seasonality model (Ridge regression, regularized to stay stable on short retrain windows) predicts one day ahead at a time.</div></div></div>
+      <div class="step"><div class="step-num"></div><div><div class="step-title">Monitor</div><div class="step-desc">Every 5 days, a z-test compares the last 14 days of forecast error against the baseline error distribution from right after the last training.</div></div></div>
+      <div class="step"><div class="step-num"></div><div><div class="step-title">Detect</div><div class="step-desc">A Kolmogorov-Smirnov test runs alongside as a secondary check on error *shape*, not just mean &mdash; catching variance changes a pure mean-shift test would miss.</div></div></div>
+      <div class="step"><div class="step-num"></div><div><div class="step-title">Retrain</div><div class="step-desc">If |z| exceeds 4.0, the model is automatically refit on the most recent 120 days &mdash; a stand-in for an Airflow-triggered Lambda retrain.</div></div></div>
+      <div class="step"><div class="step-num"></div><div><div class="step-title">Repeat</div><div class="step-desc">The cycle continues for the full 2-year simulation, with every retrain event logged and its trigger statistics recorded.</div></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="findings">
+  <div class="wrap">
+    <div class="eyebrow">FINDINGS</div>
+    <h2 style="margin:0 0 20px; font-size:1.6rem;">What the synthetic test runs showed</h2>
+    <div class="findings">
+      <div class="finding">An early version of the forecaster used plain OLS regression and produced forecasts that exploded to 1,000+ units/day on a series that never exceeds 300 &mdash; caused by trend and yearly-seasonality terms becoming collinear on short retrain windows. Switching to Ridge regularization and rescaling the trend feature fixed it, cutting MAE from 117+ to ~20.</div>
+      <div class="finding">The injected supply-shock SKU triggered a retrain within 4 days of the disruption, with a z-score nearly 40% larger in magnitude than any of its own routine periodic retrains.</div>
+      <div class="finding">Non-shocked SKUs still retrain periodically (roughly every 6-10 weeks) as ordinary forecast staleness accumulates &mdash; a real, expected MLOps pattern rather than noise, since even a well-fit lightweight model drifts stale over time without an external shock.</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>All data on this page is synthetic &mdash; part of a 5-project AI engineering portfolio.</div>
+    <div class="footer-links">
+      <a href="https://huggingface.co/spaces/Darkweb007/BEACON_FORECAST">Live demo</a>
+      <a href="https://github.com/data-geek-astronomy/BEACON_FORECAST">GitHub repo</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
